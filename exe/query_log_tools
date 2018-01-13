@@ -1,0 +1,5 @@
+#!/usr/bin/env ruby
+
+require 'query_log_tools.rb'
+
+print "Hello from query_log_tools\n"
