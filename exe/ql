@@ -1,10 +1,6 @@
 #!/usr/bin/env ruby
 
-require 'yaml'
-
 require 'thor'
-require 'mysql2'
-
 require 'query_log_tools.rb'
 
 include QueryLogTools
@@ -13,48 +9,30 @@ class App < Thor
   package_name "Query Log Tools"
 
   desc "analyze [logfile]", "Analyze log file and print a summary"
+  option :top, :type => :numeric, :default => 5, :aliases => "-t",
+         :desc => "Length of top-lists"
   def analyze(filename = nil)
-    log = Log.new(filename || $stdin)
-    LogSummary.new(log).report
+    query_log_summary(filename)
   end
 
   desc "queries [logfile]", "List queries"
   option :cached, :type => :boolean, :default => false, :aliases => "-c",
          :desc => "Include cached queries (default false)"
   def queries(filename = nil)
-    Log.new(filename || $stdin).entries.each { |e|
-      !e.cached? || options[:cached] or next
-      print e.sql, "\n"
-    }
+    query_log_queries(filename, options)
   end
 
   desc "classes [logfile]", "List classes"
-# option :"no-counts", :type => :boolean, :default => false, :aliases => "-C",
-#        :desc => "Don't list counts"
-  option :counts, :type => :boolean, :default => true, # FIXME
-         :desc => "Don't list counts"
+  option :counts, :type => :boolean, :default => true,
+         :desc => "List counts"
   def classes(filename = nil)
-    h = Hash.new(0)
-    Log.new(filename || $stdin).entries.map(&:operation).each { |op|
-      next if op !~ /^"(.*) Load"$/
-      klass = op.sub(/\"(.*) Load"/, '\1')
-      h[klass] += 1
-    }
-    if options[:counts]
-      h.sort_by(&:last).reverse.each { |k, v|
-        print v, " ", k, "\n"
-      }
-    else
-      h.keys.sort.each { |k| puts k }
-    end
+    query_log_classes(filename, options)
   end
 
   # FIXME: CTRL-C is noisy
   desc "capture [logfile]", "Capture queries from application"
   def capture(logfile = nil)
-    logfile ||= "log/small_query.log"
-    File.exist?(logfile) or error "ERROR: Can't find '#{logfile}'"
-    system("tail -f #{logfile} | sed -u '1,10d'")
+    query_log_capture(logfile)
   end
 
   # TODO: Add options for database connection parameters
@@ -63,62 +41,22 @@ class App < Thor
          :desc => "Path to YAML database configuration file or rails root directory. Default is to scan for database.yml"
   option :environment, :type => :string, :default => "development", :aliases => "-e",
          :desc => "Environment from the database configuration"
+  option :host, :type => :string, :aliases => "-h",
+         :desc => "Database hostname or IP address"
+  option :username, :type => :string, :aliases => "-u",
+         :desc => "Database username"
+  option :password, :type => :string, :aliases => "-p",
+         :desc => "Database password"
+  option :database, :type => :string, :aliases => "-d",
+         :desc => "Database name"
   option :"warm-up", :type => :numeric, :default => 0, :aliases => "-w",
          :desc => "Number of warm-up runs before time is logged"
   def replay(filename)
-    config = options[:config]
-    environment = options[:environment]
-    warm_up = options[:"warm-up"]
-
-    if config && File.file?(config)
-      config_file = config
-    else
-      path = config || Dir.pwd
-      Dir.exist?(path) or error "ERROR: '#{path}' doesn't exist"
-      config_file = find_database_yml(path) or error "ERROR: Can't find database configuration file"
-    end
-    config = YAML.load_file(config_file)[environment]
-    config or error "ERROR: Can't load #{environment} environment from #{config_file}"
-
-    client = Mysql2::Client.new(
-        :host => config["host"],
-        :username => config["username"],
-        :password => config["password"],
-        :database => config["database"])
-
-    print "# Logfile created on #{Time.now.strftime('%F %T %Z')} " \
-          "against #{config["database"]}@#{config["host"]}\n\n"
-
-    Log.new(filename || $stdin).entries.each { |e|
-      next if e.cached?
-      timestamp = Time.now.utc
-      duration = time_sql(client, e.sql, warm_up)
-      Entry.new(timestamp, e.operation, duration, e.sql, e.backtrace).write
-    }
+    query_log_replay(filename, options)
   end
 
 private
-  def time_sql(client, stmt, warm_up)
-    d = []
-    for i in (0..warm_up)
-      t0 = Time.now
-      result = client.query(stmt)
-      t1 = Time.now
-      d << (1000.0 * (t1 - t0)).round(1)
-    end
-    d.min
-  end
-
-  def find_database_yml(pwd)
-    pwd = pwd.end_with?("/") ? pwd : "#{pwd}/"
-    dirs = pwd.scan(/[^\/]*\//)
-    while !dirs.empty?
-      file = dirs.join + "config/database.yml"
-      return file if File.exist?(file)
-      dirs.pop
-    end
-    nil
-  end
+  def self.exit_on_failure?() true end
 end
 
 App.start
