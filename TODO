@@ -1,4 +1,5 @@
 TODO
   o Handle zero-time logs (logs where time of first and last query is the same)
   o Add version command/option
+  o Get rid of Thor or create better integration for #error and #fail
 

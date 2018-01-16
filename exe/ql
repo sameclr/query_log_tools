@@ -3,8 +3,6 @@
 require 'thor'
 require 'query_log_tools.rb'
 
-include QueryLogTools
-
 class App < Thor
   package_name "Query Log Tools"
 
@@ -12,27 +10,27 @@ class App < Thor
   option :top, :type => :numeric, :default => 5, :aliases => "-t",
          :desc => "Length of top-lists"
   def analyze(filename = nil)
-    query_log_summary(filename, options)
+    QueryLogTools.query_log_summary(filename, options)
   end
 
   desc "queries [logfile]", "List queries"
   option :cached, :type => :boolean, :default => false, :aliases => "-c",
          :desc => "Include cached queries (default false)"
   def queries(filename = nil)
-    query_log_queries(filename, options)
+    QueryLogTools.query_log_queries(filename, options)
   end
 
   desc "classes [logfile]", "List classes"
   option :counts, :type => :boolean, :default => true,
          :desc => "List counts"
   def classes(filename = nil)
-    query_log_classes(filename, options)
+    QueryLogTools.query_log_classes(filename, options)
   end
 
   # FIXME: CTRL-C is noisy
   desc "capture [logfile]", "Capture queries from application"
   def capture(logfile = nil)
-    query_log_capture(logfile)
+    QueryLogTools.query_log_capture(logfile)
   end
 
   # TODO: Add options for database connection parameters
@@ -52,7 +50,7 @@ class App < Thor
   option :"warm-up", :type => :numeric, :default => 0, :aliases => "-w",
          :desc => "Number of warm-up runs before time is logged"
   def replay(filename)
-    query_log_replay(filename, options)
+    QueryLogTools.query_log_replay(filename, options)
   end
 
 private

@@ -7,21 +7,22 @@ require 'query_log_tools/query_log'
 require 'query_log_tools/query_log_parser'
 require 'query_log_tools/query_log_summary'
 require 'query_log_tools/version'
+require 'query_log_tools/error'
 
 module QueryLogTools
-  def query_log_summary(filename_or_nil, options)
+  def self.query_log_summary(filename_or_nil, options)
     log = Log.new(filename_or_nil || $stdin)
     LogSummary.new(log).report(options[:top] || LogSummary::TOP_LIST_LENGTH)
   end
 
-  def query_log_queries(filename_or_nil, options)
+  def self.query_log_queries(filename_or_nil, options)
     Log.new(filename_or_nil || $stdin).entries.each { |e|
       !e.cached? || options[:cached] or next
       print e.sql, "\n"
     }
   end
 
-  def query_log_classes(filename_or_nil, options)
+  def self.query_log_classes(filename_or_nil, options)
     h = Hash.new(0)
     Log.new(filename_or_nil || $stdin).entries.map(&:operation).each { |op|
       next if op !~ /^"(.*) Load"$/
@@ -37,17 +38,17 @@ module QueryLogTools
     end
   end
 
-  def query_log_capture(logfile_or_nil)
+  def self.query_log_capture(logfile_or_nil)
     logfile_or_nil ||= "log/small_query.log"
-    File.exist?(logfile) or error "ERROR: Can't find '#{logfile}'"
+    File.exist?(logfile) or fail "Can't find '#{logfile}'"
     system("tail -f #{logfile_or_nil} | sed -u '1,10d'")
   end
 
-  def query_log_replay(filename, options)
+  def self.query_log_replay(filename, options)
     config_file = find_database_yml(options[:config])
     config = YAML.load_file(config_file)[options[:environment]] or
-        error "ERROR: Can't load #{options[:environment]} environment " \
-              "from #{config_file}"
+        fail "Can't load #{options[:environment]} environment " \
+             "from #{config_file}"
 
     connection = Mysql2::Client.new({
         :host => options[:host] || config["host"],
@@ -72,17 +73,17 @@ private
   # database.yml, a path to the rails root directory, or nil. If nil, this 
   # method will search upwards in the dirctory hierarchy looking for a rails 
   # root
-  def find_database_yml(filename_or_nil)
+  def self.find_database_yml(filename_or_nil)
     if filename_or_nil
       if File.file?(filename_or_nil)
         return filename_or_nil
       elsif File.directory?(filename_or_nil)
         filename = "#{filename_or_nil}/config/database.yml"
         File.file?(filename) or 
-            error "ERROR: '#{filename_or_nil}' is not a Rails root directory"
+            fail "'#{filename_or_nil}' is not a Rails root directory"
         return filename
       else
-        error "ERROR: Can't read '#{filename_or_nil}'"
+        fail "Can't read '#{filename_or_nil}'"
       end
     else
       path = Dir.pwd + "/"
@@ -92,11 +93,14 @@ private
         return file if File.exist?(filename)
         dirs.pop
       end
-      error "ERROR: Can't find database configuration file"
+#     error GoBoom.new
+      fail "Can't find database configuration file"
+#     raise Thor::Error.new "Can't find database configuration file"
+#     error "ERROR: Can't find database configuration file"
     end
   end
 
-  def time_sql(connection, stmt, warm_up)
+  def self.time_sql(connection, stmt, warm_up)
     d = []
     for i in (0..warm_up)
       t0 = Time.now
@@ -107,21 +111,4 @@ private
     d.min
   end
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
