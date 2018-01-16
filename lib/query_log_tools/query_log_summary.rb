@@ -6,7 +6,7 @@ module QueryLogTools
     # minutes/seconds instead of milliseconds
     TIME_FORMAT_THRESHOLD = 100_000 
 
-    # Number of items to include in top-lists
+    # Default number of items to include in top-lists
     TOP_LIST_LENGTH = 5
 
     delegate :filename, :entries, :start_timestamp, :end_timestamp, 
@@ -43,7 +43,7 @@ module QueryLogTools
     def abstract_count() @abstract_count ||= abstract_entries.sum(&:count) end
     def singleton_count() singleton_entries.size end
 
-    def report
+    def report(top_n = TOP_LIST_LENGTH)
       cw = entries.size.to_s.size # Count Width
       if job_duration >= TIME_FORMAT_THRESHOLD
         job_duration_s = ms2time(job_duration)
@@ -73,39 +73,39 @@ module QueryLogTools
           "(#{singleton_duration}ms, #{pct(sql_duration, singleton_duration)}% of SQL)\n"
       puts
 
-#     print_cached_queries if !cached_entries.empty?
-      print_repeated_queries if !repeated_entries.empty?
-      print_abstract_queries if !abstract_entries.empty?
-      print_slow_queries
+#     print_cached_queries(top_n) if !cached_entries.empty?
+      print_repeated_queries(top_n) if !repeated_entries.empty?
+      print_abstract_queries(top_n) if !abstract_entries.empty?
+      print_slow_queries(top_n)
     end
 
-    def print_cached_queries
-      print "   Top-#{TOP_LIST_LENGTH} cached queries by frequency:\n"
-      cached_entries.sort_by(&:count).reverse.first(TOP_LIST_LENGTH).each { |e|
+    def print_cached_queries(top_n)
+      print "   Top-#{top_n} cached queries by frequency:\n"
+      cached_entries.sort_by(&:count).reverse.first(top_n).each { |e|
         print "      #{e.count} times (#{e.duration}ms), #{e.sql}\n"
       }
       puts
     end
 
-    def print_repeated_queries
-      print "   Top-#{TOP_LIST_LENGTH} repeated queries by frequency:\n"
-      repeated_entries.sort_by(&:count).reverse.first(TOP_LIST_LENGTH).each { |e|
+    def print_repeated_queries(top_n)
+      print "   Top-#{top_n} repeated queries by frequency:\n"
+      repeated_entries.sort_by(&:count).reverse.first(top_n).each { |e|
         print "      #{e.count} times (#{e.duration}ms) #{e.sql}\n"
       }
       puts
     end
 
-    def print_abstract_queries
-      print "   Top-#{TOP_LIST_LENGTH} abstract queries by frequency:\n"
-      abstract_entries.sort_by(&:count).reverse.first(TOP_LIST_LENGTH).each { |e|
+    def print_abstract_queries(top_n)
+      print "   Top-#{top_n} abstract queries by frequency:\n"
+      abstract_entries.sort_by(&:count).reverse.first(top_n).each { |e|
         print "      #{e.count} times (#{e.duration}ms) #{e.abstract_sql}\n"
       }
       puts
     end
 
-    def print_slow_queries
-      print "   Top-#{TOP_LIST_LENGTH} slow queries:\n"
-      entries.sort_by(&:duration).reverse.first(TOP_LIST_LENGTH).each { |e|
+    def print_slow_queries(top_n)
+      print "   Top-#{top_n} slow queries:\n"
+      entries.sort_by(&:duration).reverse.first(top_n).each { |e|
         print "      #{e.duration}ms (#{pct(sql_duration, e.duration)}%) #{e.sql}\n"
       }
       puts

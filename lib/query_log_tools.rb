@@ -9,9 +9,9 @@ require 'query_log_tools/query_log_summary'
 require 'query_log_tools/version'
 
 module QueryLogTools
-  def query_log_summary(filename_or_nil)
+  def query_log_summary(filename_or_nil, options)
     log = Log.new(filename_or_nil || $stdin)
-    LogSummary.new(log).report
+    LogSummary.new(log).report(options[:top] || LogSummary::TOP_LIST_LENGTH)
   end
 
   def query_log_queries(filename_or_nil, options)

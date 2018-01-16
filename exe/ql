@@ -12,7 +12,7 @@ class App < Thor
   option :top, :type => :numeric, :default => 5, :aliases => "-t",
          :desc => "Length of top-lists"
   def analyze(filename = nil)
-    query_log_summary(filename)
+    query_log_summary(filename, options)
   end
 
   desc "queries [logfile]", "List queries"
