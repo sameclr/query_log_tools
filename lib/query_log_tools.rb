@@ -1,11 +1,11 @@
 require 'mysql2'
 require 'yaml'
 
-require 'query_log_tools/entry'
-require 'query_log_tools/entry_group'
-require 'query_log_tools/log'
-require 'query_log_tools/log_parser'
-require 'query_log_tools/log_summary'
+require 'query_log_tools/query_log_entry'
+require 'query_log_tools/query_log_entry_group'
+require 'query_log_tools/query_log'
+require 'query_log_tools/query_log_parser'
+require 'query_log_tools/query_log_summary'
 require 'query_log_tools/version'
 
 module QueryLogTools

@@ -1,6 +1,6 @@
 require 'time'
 
-require 'query_log_tools/entry.rb'
+require 'query_log_tools/query_log_entry.rb'
 
 module QueryLogTools
   class LogParser

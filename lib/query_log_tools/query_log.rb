@@ -1,4 +1,4 @@
-require 'query_log_tools/log_parser'
+require 'query_log_tools/query_log_parser'
 
 module QueryLogTools
   class Log
