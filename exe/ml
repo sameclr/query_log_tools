@@ -7,9 +7,9 @@ class App < Thor
   package_name "MySQL Log Tools"
 
   desc "queries [logfile]", "List queries"
-  option :format, :type => :string, :default => "raw", :aliases => "-f",
-         :enum => %w(raw short abstract),
-         :desc => "Query format"
+  option :format, :desc => "Query format",
+      :type => :string, :default => "raw", :aliases => "-f",
+      :enum => %w(raw short abstract)
   def queries(filename = "/dev/stdin")
     MysqlLogTools.list_queries(filename, options[:format].to_sym)
   end

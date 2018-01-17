@@ -8,12 +8,12 @@ class App < Thor
   package_name "Query Log Tools"
 
   desc "report [logfile]", "Analyze log file and print report"
-  option :top, :type => :numeric, :default => QueryLogTools::LogSummary::TOP_LIST_LENGTH, 
-         :aliases => "-t", 
-         :desc => "Length of top-lists"
-  option :format, :type => :string, :default => "raw", :aliases => "-f",
-         :enum => %w(raw short abstract),
-         :desc => "Format for slow queries"
+  option :top, :desc => "Length of top-lists",
+      :type => :numeric, :default => QueryLogTools::LogSummary::TOP_LIST_LENGTH, 
+      :aliases => "-t"
+  option :format, :desc => "Format for slow queries",
+      :type => :string, :default => "raw", :aliases => "-f",
+      :enum => %w(raw short abstract)
   def report(filename = "/dev/stdin")
     QueryLogTools.report(
         filename, 
@@ -21,22 +21,22 @@ class App < Thor
   end
 
   desc "list [logfile]", "List logfile entries"
-  option :cached, :type => :boolean, :default => false, :aliases => "-c",
-         :desc => "Include cached queries (default false)"
+  option :cached, :desc => "Include cached queries (default false)",
+      :type => :boolean, :default => false, :aliases => "-c"
   def list(filename = "/dev/stdin")
     QueryLogTools.list(filename, options[:cached])
   end
 
   desc "queries [logfile]", "List queries"
-  option :cached, :type => :boolean, :default => false, :aliases => "-c",
-         :desc => "Include cached queries (default false)"
+  option :cached, :desc => "Include cached queries (default false)",
+      :type => :boolean, :default => false, :aliases => "-c"
   def queries(filename = "/dev/stdin")
     QueryLogTools.list_queries(filename, options)
   end
 
   desc "classes [logfile]", "List classes"
-  option :counts, :type => :boolean, :default => true,
-         :desc => "List counts"
+  option :counts, :desc => "List counts",
+      :type => :boolean, :default => true
   def classes(filename = "/dev/stdin")
     QueryLogTools.list_classes(filename, options)
   end
@@ -49,20 +49,20 @@ class App < Thor
 
   # TODO: Add options for database connection parameters
   desc "replay logfile", "Replay log against database"
-  option :config, :type => :string, :default => nil, :aliases => "-c",
-         :desc => "Path to YAML database configuration file or rails root directory. Default is to scan for database.yml"
-  option :environment, :type => :string, :default => "development", :aliases => "-e",
-         :desc => "Environment from the database configuration"
-  option :host, :type => :string, :aliases => "-h",
-         :desc => "Database hostname or IP address"
-  option :username, :type => :string, :aliases => "-u",
-         :desc => "Database username"
-  option :password, :type => :string, :aliases => "-p",
-         :desc => "Database password"
-  option :database, :type => :string, :aliases => "-d",
-         :desc => "Database name"
-  option :"warm-up", :type => :numeric, :default => 0, :aliases => "-w",
-         :desc => "Number of warm-up runs before time is logged"
+  option :config, :desc => "Path to YAML database configuration file or rails root directory. Default is to scan for database.yml",
+      :type => :string, :default => nil, :aliases => "-c"
+  option :environment, :desc => "Environment from the database configuration",
+      :type => :string, :default => "development", :aliases => "-e"
+  option :host, :desc => "Database hostname or IP address",
+      :type => :string, :aliases => "-h"
+  option :username, :desc => "Database username",
+      :type => :string, :aliases => "-u"
+  option :password, :desc => "Database password",
+      :type => :string, :aliases => "-p"
+  option :database, :desc => "Database name",
+      :type => :string, :aliases => "-d"
+  option :"warm-up", :desc => "Number of warm-up runs before time is logged",
+      :type => :numeric, :default => 0, :aliases => "-w"
   def replay(filename = "/dev/stdin")
     QueryLogTools.replay(filename, options)
   end
