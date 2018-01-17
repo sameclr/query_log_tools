@@ -5,7 +5,7 @@ require 'query_log_tools.rb'
 require 'log_tools/query_log_summary'
 
 class App < Thor
-  package_name "Query Log Tools"
+  package_name "Query Log"
 
   desc "report [logfile]", "Analyze log file and print report"
   option :top, :desc => "Length of top-lists",
@@ -48,7 +48,7 @@ class App < Thor
   end
 
   # TODO: Add options for database connection parameters
-  desc "replay logfile", "Replay log against database"
+  desc "replay [logfile]", "Replay log against database"
   option :config, :desc => "Path to YAML database configuration file or rails root directory. Default is to scan for database.yml",
       :type => :string, :default => nil, :aliases => "-c"
   option :environment, :desc => "Environment from the database configuration",

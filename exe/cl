@@ -4,7 +4,7 @@ require 'thor'
 require 'consolidated_log_tools'
 
 class App < Thor
-  package_name "Consolidated Log Tools"
+  package_name "Consolidated Log"
 
   desc "fetch", "Fetch MySQL slow query logs from server"
   def fetch

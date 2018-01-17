@@ -4,7 +4,7 @@ require 'thor'
 require 'mysql_log_tools.rb'
 
 class App < Thor
-  package_name "MySQL Log Tools"
+  package_name "MySQL Log"
 
   desc "queries [logfile]", "List queries"
   option :format, :desc => "Query format",
