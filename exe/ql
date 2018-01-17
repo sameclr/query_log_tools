@@ -9,27 +9,27 @@ class App < Thor
   desc "analyze [logfile]", "Analyze log file and print a summary"
   option :top, :type => :numeric, :default => 5, :aliases => "-t",
          :desc => "Length of top-lists"
-  def analyze(filename = nil)
+  def analyze(filename = "/dev/stdin")
     QueryLogTools.query_log_summary(filename, options)
   end
 
   desc "queries [logfile]", "List queries"
   option :cached, :type => :boolean, :default => false, :aliases => "-c",
          :desc => "Include cached queries (default false)"
-  def queries(filename = nil)
+  def queries(filename = "/dev/stdin")
     QueryLogTools.query_log_queries(filename, options)
   end
 
   desc "classes [logfile]", "List classes"
   option :counts, :type => :boolean, :default => true,
          :desc => "List counts"
-  def classes(filename = nil)
+  def classes(filename = "/dev/stdin")
     QueryLogTools.query_log_classes(filename, options)
   end
 
   # FIXME: CTRL-C is noisy
   desc "capture [logfile]", "Capture queries from application"
-  def capture(logfile = nil)
+  def capture(logfile = "log/small_query.log")
     QueryLogTools.query_log_capture(logfile)
   end
 
@@ -49,7 +49,7 @@ class App < Thor
          :desc => "Database name"
   option :"warm-up", :type => :numeric, :default => 0, :aliases => "-w",
          :desc => "Number of warm-up runs before time is logged"
-  def replay(filename)
+  def replay(filename = "/dev/stdin")
     QueryLogTools.query_log_replay(filename, options)
   end
 

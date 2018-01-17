@@ -12,21 +12,21 @@ require 'log_tools/query_log_parser'
 require 'log_tools/query_log_summary'
 
 module QueryLogTools
-  def self.query_log_summary(filename_or_nil, options)
-    log = Log.new(filename_or_nil || $stdin)
+  def self.query_log_summary(filename, options)
+    log = Log.new(filename)
     LogSummary.new(log).report(options[:top] || LogSummary::TOP_LIST_LENGTH)
   end
 
-  def self.query_log_queries(filename_or_nil, options)
-    Log.new(filename_or_nil || $stdin).entries.each { |e|
+  def self.query_log_queries(filename, options)
+    Log.new(filename).entries.each { |e|
       !e.cached? || options[:cached] or next
       print e.sql, "\n"
     }
   end
 
-  def self.query_log_classes(filename_or_nil, options)
+  def self.query_log_classes(filename, options)
     h = Hash.new(0)
-    Log.new(filename_or_nil || $stdin).entries.map(&:operation).each { |op|
+    Log.new(filename).entries.map(&:operation).each { |op|
       next if op !~ /^"(.*) Load"$/
       klass = op.sub(/\"(.*) Load"/, '\1')
       h[klass] += 1
@@ -40,8 +40,7 @@ module QueryLogTools
     end
   end
 
-  def self.query_log_capture(logfile_or_nil)
-    logfile_or_nil ||= "log/small_query.log"
+  def self.query_log_capture(logfile)
     File.exist?(logfile) or fail "Can't find '#{logfile}'"
     system("tail -f #{logfile_or_nil} | sed -u '1,10d'")
   end
@@ -62,30 +61,32 @@ module QueryLogTools
     print "# Logfile created on #{Time.now.utc.strftime('%F %T %Z')} " \
           "against #{config["database"]}@#{config["host"]}\n\n"
 
-    # FIXME Entry#write is missing
+    # FIXME Entry#render is missing
     Log.new(filename || $stdin).entries.each { |e|
       next if e.cached?
       timestamp = Time.now.utc
       duration = time_sql(connection, e.sql, options[:"warm-up"])
-      Entry.new(timestamp, e.operation, duration, e.sql, e.backtrace).write
+      Entry.new(timestamp, e.operation, duration, e.sql, e.backtrace).render
     }
   end
 
 private
   # Find path to database.yml. filename_or_nil is either a direct path to
-  # database.yml, a path to the rails root directory, or nil. If nil, search
-  # upwards in the dirctory hierarchy looking for a rails root
+  # database.yml, a path to the rails root directory, or nil. If nil, 
+  # find_database_yml will search upwards in the directory hierarchy looking 
+  # for a rails root
   def self.find_database_yml(filename_or_nil)
     if filename_or_nil
-      if File.file?(filename_or_nil)
-        return filename_or_nil
-      elsif File.directory?(filename_or_nil)
-        filename = "#{filename_or_nil}/config/database.yml"
+      filename = filename_or_nil
+      if File.file?(filename)
+        return filename
+      elsif File.directory?(filename)
+        filename = "#{filename}/config/database.yml"
         File.file?(filename) or 
-            fail "'#{filename_or_nil}' is not a Rails root directory"
+            fail "'#{filename}' is not a Rails root directory"
         return filename
       end
-      fail "Can't read '#{filename_or_nil}'"
+      fail "Can't read '#{filename}'"
     else
       path = Dir.pwd + "/"
       dirs = path.scan(/[^\/]*\//)
