@@ -6,24 +6,13 @@
 /pkg/
 /spec/reports/
 /tmp/
+/var/
 
 # rspec failure tracking
 .rspec_status
 
-# Ignore ./query_log_tools
-/query_log_tools
-
 # Ignore Gemfile.lock. See https://stackoverflow.com/questions/4151495/should-gemfile-lock-be-included-in-gitignore
 /Gemfile.lock
 
-# Ignore vim files
-.*.swp
-
-# Ignore t.* files
-t
-t.*
-tt
-tt.*
-s
-s.*
-
+# Ignore random log files
+*.log

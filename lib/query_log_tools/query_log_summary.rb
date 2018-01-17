@@ -1,5 +1,6 @@
 require 'active_support/core_ext/module/delegation' # for #delegate
 
+# TODO Rename LogReport
 module QueryLogTools
   class LogSummary
     # Number of milliseconds before switching to present the time as
@@ -11,6 +12,8 @@ module QueryLogTools
 
     delegate :filename, :entries, :start_timestamp, :end_timestamp, 
              :job_duration, :sql_duration, to: :@log
+
+    # TODO Move to Log
     attr_reader :cached_entries, :repeated_entries, :abstract_entries, :singleton_entries
 
     def initialize(log)
@@ -19,7 +22,7 @@ module QueryLogTools
       @cached_entries = []
       @repeated_entries = []
       @abstract_entries = []
-      @singleton_entries = log.entries.dup
+      @singleton_entries = entries.dup
 
       cached = []
       @singleton_entries.reject! { |e| e.cached? and cached << e }
@@ -44,7 +47,16 @@ module QueryLogTools
     def singleton_count() singleton_entries.size end
 
     def report(top_n = TOP_LIST_LENGTH)
+      print_summary
+#     print_cached_queries(top_n) if !cached_entries.empty?
+      print_repeated_queries(top_n) if !repeated_entries.empty?
+      print_abstract_queries(top_n) if !abstract_entries.empty?
+      print_slow_queries(top_n)
+    end
+
+    def print_summary
       cw = entries.size.to_s.size # Count Width
+
       if job_duration >= TIME_FORMAT_THRESHOLD
         job_duration_s = ms2time(job_duration)
         sql_duration_s = "%#{job_duration_s.size}s" % ms2time(sql_duration)
@@ -57,26 +69,21 @@ module QueryLogTools
       print "   Start: #{start_timestamp}\n"
       print "   End  : #{end_timestamp}\n"
       print "   Job duration: #{job_duration_s}\n"
-      print "   SQL duration: #{sql_duration_s} (#{pct(job_duration, sql_duration)}%)\n"
+      print "   SQL duration: #{sql_duration_s} (#{pct(job_duration, sql_duration)})\n"
       puts
       print "   Total queries   : #{entries.size}\n"
-      print "   Cached queries  : #{pir(cached_count, cw)}, #{cached_entries.size} unique\n"
-      print "   Executed queries: #{pir(entries.size-cached_count, cw)}, ",
+      print "   Cached queries  : #{rir(cached_count, cw)}, #{cached_entries.size} unique\n"
+      print "   Executed queries: #{rir(entries.size-cached_count, cw)}, ",
           "#{repeated_entries.size+abstract_entries.size+singleton_entries.size} unique\n"
-      print "      Repeated     : #{pir(repeated_count, cw)}, ",
+      print "      Repeated     : #{rir(repeated_count, cw)}, ",
           "#{repeated_entries.size} unique ",
-          "(#{repeated_duration}ms, #{pct(sql_duration, repeated_duration)}% of SQL)\n"
-      print "      Abstract     : #{pir(abstract_count, cw)}, ",
+          "(#{repeated_duration}ms, #{pct(sql_duration, repeated_duration)} of SQL)\n"
+      print "      Abstract     : #{rir(abstract_count, cw)}, ",
           "#{abstract_entries.size} unique ",
-          "(#{abstract_duration}ms, #{pct(sql_duration, abstract_duration)}% of SQL)\n"
-      print "      Singleton    : #{pir(singleton_entries.size, cw)} ",
-          "(#{singleton_duration}ms, #{pct(sql_duration, singleton_duration)}% of SQL)\n"
+          "(#{abstract_duration}ms, #{pct(sql_duration, abstract_duration)} of SQL)\n"
+      print "      Singleton    : #{rir(singleton_entries.size, cw)} ",
+          "(#{singleton_duration}ms, #{pct(sql_duration, singleton_duration)} of SQL)\n"
       puts
-
-#     print_cached_queries(top_n) if !cached_entries.empty?
-      print_repeated_queries(top_n) if !repeated_entries.empty?
-      print_abstract_queries(top_n) if !abstract_entries.empty?
-      print_slow_queries(top_n)
     end
 
     def print_cached_queries(top_n)
@@ -106,27 +113,33 @@ module QueryLogTools
     def print_slow_queries(top_n)
       print "   Top-#{top_n} slow queries:\n"
       entries.sort_by(&:duration).reverse.first(top_n).each { |e|
-        print "      #{e.duration}ms (#{pct(sql_duration, e.duration)}%) #{e.sql}\n"
+        print "      #{e.duration}ms (#{pct(sql_duration, e.duration)}) #{e.sql}\n"
       }
       puts
     end
 
   private
-    def pct(whole, part) (100 * part.to_f / whole).round(1) end
-    def pir(n, w) "%#{w}d" % n end # Print integer right-adjusted in a w-sized field
+    # Compute and render procent with a '%' suffix
+    def pct(whole, part) (100 * part.to_f / whole).round(1).to_s + "%" end
 
+    # Render integer right-adjusted in a w-sized field
+    def rir(n, w) "%#{w}d" % n end 
+
+    # Render time in milliseconds as duration in hours/mins/secs
     def ms2time(ms)
-      rest = ms.to_i
-      hours = rest / 3_600_000
-      rest = rest % 3_600_000
-      mins = rest / 60000
-      rest = rest % 60000
-      secs = (rest / 1000.0).round(0)
+      s = (ms / 1000).round(0)
+      hours, mins, secs = s / 3600, s / 60 % 60, s % 60
       if hours > 0
         "%d:%02d:%02d" % [hours, mins, secs]
       else
-        "%02d:%02d" % [mins, secs]
+        "%d:%02d" % [mins, secs]
       end
     end
   end
 end
+
+
+
+
+
+

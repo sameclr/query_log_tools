@@ -1,0 +1,20 @@
+#!/usr/bin/env ruby
+
+require 'thor'
+require 'mysql_log_tools.rb'
+
+class App < Thor
+  package_name "MySQL Log Tools"
+
+  desc "fetch", "Fetch MySQL slow query logs from server"
+  def fetch
+    MySqlLogTools.fetch
+  end
+
+  desc "process", "Process downloaded MySQL slow query logs"
+  def process
+    MySqlLogTools.process
+  end
+end
+
+App.start
