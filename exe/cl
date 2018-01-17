@@ -1,0 +1,30 @@
+#!/usr/bin/env ruby
+
+require 'thor'
+require 'consolidated_log_tools'
+
+class App < Thor
+  package_name "Consolidated Log Tools"
+
+  desc "fetch", "Fetch MySQL slow query logs from server"
+  def fetch
+    ConsolidatedLogTools.fetch
+  end
+
+  desc "process", "Process downloaded MySQL slow query logs"
+  def process(filename = "/dev/stdin")
+    ConsolidatedLogTools.process(filename)
+  end
+
+  desc "list", "List consolidated queries"
+  def list(filename = "/dev/stdin") # FIXME: data file
+    ConsolidatedLogTools.list(filename)
+  end
+
+  desc "list-abstract", "List consolidated abstract queries"
+  def list_abstract(filename) # FIXME: data file
+    ConsolidatedLogTools.list(filename, :abstract)
+  end
+end
+
+App.start

@@ -1,0 +1,3 @@
+
+module LogTools
+end

@@ -1,14 +1,26 @@
 
 module LogTools
-  # Common entry class. Used by QueryLogTools::Entry and MySqlLogTools::Entry
   class Entry
+    DEFAULT_SHORT_SQL_LENGTH = 1024
+
     attr_reader :timestamp, :duration, :sql
 
     def initialize(timestamp, duration, sql)
       @timestamp, @duration, @sql = timestamp, duration, sql
     end
 
-    def short_sql(max_size = 1024)
+    # Return SQL in one of the following formats: :raw, :short, :abstract
+    def format_sql(format = :raw, max_size = DEFAULT_SHORT_SQL_LENGTH)
+      case format
+      when :raw; sql
+      when :short; short_sql(max_size)
+      when :abstract; abstract_sql
+      else
+        raise "Illegal format: '#{format}'"
+      end
+    end
+
+    def short_sql(max_size = DEFAULT_SHORT_SQL_LENGTH)
       if sql.size > size
         sql[0...max_size] +  + "... [#{sql.size} characters in total]"
       else
@@ -32,6 +44,7 @@ module LogTools
         s.gsub!(/\(-?\d+(\s*,\s*-?\d+)*\)/, "(?)") # IN clause
         s.gsub!(/\d\d\d\d-\d\d-\d\d/, "?") # Dates
         s.gsub!(/\b\d+\b/, "?") # Integers
+        s.gsub!(/\s\s+/, " ") # Remove repeated spaces
 
         # Undo protection
         s.gsub!(/\bACTIVE_(\d+)\b/, 'active = \1')

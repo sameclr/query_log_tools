@@ -6,14 +6,17 @@ require 'mysql_log_tools.rb'
 class App < Thor
   package_name "MySQL Log Tools"
 
-  desc "fetch", "Fetch MySQL slow query logs from server"
-  def fetch
-    MySqlLogTools.fetch
+  desc "queries [logfile]", "List queries"
+  option :format, :type => :string, :default => "raw", :aliases => "-f",
+         :enum => %w(raw short abstract),
+         :desc => "Query format"
+  def queries(filename = "/dev/stdin")
+    MysqlLogTools.list_queries(filename, options[:format].to_sym)
   end
 
-  desc "process", "Process downloaded MySQL slow query logs"
-  def process
-    MySqlLogTools.process
+  desc "abstract-queries [logfile]", "List abstract queries in log file"
+  def abstract_queries(filename = "/dev/stdin")
+    MysqlLogTools.list_queries(filename, :abstract)
   end
 end
 

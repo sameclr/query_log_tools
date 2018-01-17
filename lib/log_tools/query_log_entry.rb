@@ -11,7 +11,7 @@ module QueryLogTools
 
     def cached?() operation == "[cached]" end
 
-    def write
+    def render
       print "#{timestamp.strftime("%F %T %Z")} #{operation} (#{duration}ms)\n"
       print "  #{sql}\n"
       print "  ↳ #{backtrace.first}\n"
