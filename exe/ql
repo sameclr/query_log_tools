@@ -10,34 +10,34 @@ class App < Thor
   option :top, :type => :numeric, :default => 5, :aliases => "-t",
          :desc => "Length of top-lists"
   def analyze(filename = "/dev/stdin")
-    QueryLogTools.query_log_summary(filename, options)
+    QueryLogTools.summary(filename, options)
   end
 
   desc "list [logfile]", "List logfile entries"
   option :cached, :type => :boolean, :default => false, :aliases => "-c",
          :desc => "Include cached queries (default false)"
   def list(filename = "/dev/stdin")
-    QueryLogTools.query_log_list(filename, options[:cached])
+    QueryLogTools.list(filename, options[:cached])
   end
 
   desc "queries [logfile]", "List queries"
   option :cached, :type => :boolean, :default => false, :aliases => "-c",
          :desc => "Include cached queries (default false)"
   def queries(filename = "/dev/stdin")
-    QueryLogTools.query_log_queries(filename, options)
+    QueryLogTools.list_queries(filename, options)
   end
 
   desc "classes [logfile]", "List classes"
   option :counts, :type => :boolean, :default => true,
          :desc => "List counts"
   def classes(filename = "/dev/stdin")
-    QueryLogTools.query_log_classes(filename, options)
+    QueryLogTools.list_classes(filename, options)
   end
 
   # FIXME: CTRL-C is noisy
   desc "capture [logfile]", "Capture queries from application"
   def capture(logfile = "log/small_query.log")
-    QueryLogTools.query_log_capture(logfile)
+    QueryLogTools.capture(logfile)
   end
 
   # TODO: Add options for database connection parameters
@@ -57,7 +57,7 @@ class App < Thor
   option :"warm-up", :type => :numeric, :default => 0, :aliases => "-w",
          :desc => "Number of warm-up runs before time is logged"
   def replay(filename = "/dev/stdin")
-    QueryLogTools.query_log_replay(filename, options)
+    QueryLogTools.replay(filename, options)
   end
 
 private

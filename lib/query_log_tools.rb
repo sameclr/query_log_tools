@@ -12,12 +12,12 @@ require 'log_tools/query_log_parser'
 require 'log_tools/query_log_summary'
 
 module QueryLogTools
-  def self.query_log_summary(filename, options)
+  def self.summary(filename, options)
     log = Log.new(filename)
     LogSummary.new(log).report(options[:top] || LogSummary::TOP_LIST_LENGTH)
   end
 
-  def self.query_log_list(filename, incl_cached)
+  def self.list(filename, incl_cached)
     Log.new(filename).entries.each { |e|
       !e.cached? || incl_cached or next
       e.render
@@ -25,14 +25,14 @@ module QueryLogTools
     }
   end
 
-  def self.query_log_queries(filename, options)
+  def self.list_queries(filename, options)
     Log.new(filename).entries.each { |e|
       !e.cached? || options[:cached] or next
       print e.sql, "\n"
     }
   end
 
-  def self.query_log_classes(filename, options)
+  def self.list_classes(filename, options)
     h = Hash.new(0)
     Log.new(filename).entries.map(&:operation).each { |op|
       next if op !~ /^"(.*) Load"$/
@@ -48,12 +48,12 @@ module QueryLogTools
     end
   end
 
-  def self.query_log_capture(logfile)
+  def self.capture(logfile)
     File.exist?(logfile) or fail "Can't find '#{logfile}'"
     system("tail -f #{logfile_or_nil} | sed -u '1,10d'")
   end
 
-  def self.query_log_replay(filename, options)
+  def self.replay(filename, options)
     config_file = find_database_yml(options[:config])
     config = YAML.load_file(config_file)[options[:environment]] or
         fail "Can't load #{options[:environment]} environment " \
