@@ -12,9 +12,9 @@ require 'log_tools/query_log_parser'
 require 'log_tools/query_log_summary'
 
 module QueryLogTools
-  def self.summary(filename, options)
+  def self.report(filename, options = {})
     log = Log.new(filename)
-    LogSummary.new(log).report(options[:top] || LogSummary::TOP_LIST_LENGTH)
+    LogSummary.new(log).report(options)
   end
 
   def self.list(filename, incl_cached)

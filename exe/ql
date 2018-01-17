@@ -2,15 +2,22 @@
 
 require 'thor'
 require 'query_log_tools.rb'
+require 'log_tools/query_log_summary'
 
 class App < Thor
   package_name "Query Log Tools"
 
-  desc "analyze [logfile]", "Analyze log file and print a summary"
-  option :top, :type => :numeric, :default => 5, :aliases => "-t",
+  desc "report [logfile]", "Analyze log file and print report"
+  option :top, :type => :numeric, :default => QueryLogTools::LogSummary::TOP_LIST_LENGTH, 
+         :aliases => "-t", 
          :desc => "Length of top-lists"
-  def analyze(filename = "/dev/stdin")
-    QueryLogTools.summary(filename, options)
+  option :format, :type => :string, :default => "raw", :aliases => "-f",
+         :enum => %w(raw short abstract),
+         :desc => "Format for slow queries"
+  def report(filename = "/dev/stdin")
+    QueryLogTools.report(
+        filename, 
+        :top_n => options[:top], :format => options[:format].to_sym)
   end
 
   desc "list [logfile]", "List logfile entries"

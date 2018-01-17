@@ -21,7 +21,7 @@ module LogTools
     end
 
     def short_sql(max_size = DEFAULT_SHORT_SQL_LENGTH)
-      if sql.size > size
+      if sql.size > max_size
         sql[0...max_size] +  + "... [#{sql.size} characters in total]"
       else
         sql

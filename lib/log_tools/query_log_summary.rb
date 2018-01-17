@@ -46,12 +46,15 @@ module QueryLogTools
     def abstract_count() @abstract_count ||= abstract_entries.sum(&:count) end
     def singleton_count() singleton_entries.size end
 
-    def report(top_n = TOP_LIST_LENGTH)
+    def report(options = {})
+      top_n = options[:top_n] || TOP_LIST_LENGTH
+      format = options[:format] || :raw
+
       print_summary
 #     print_cached_queries(top_n) if !cached_entries.empty?
       print_repeated_queries(top_n) if !repeated_entries.empty?
       print_abstract_queries(top_n) if !abstract_entries.empty?
-      print_slow_queries(top_n)
+      print_slow_queries(top_n, format)
     end
 
     def print_summary
@@ -110,10 +113,11 @@ module QueryLogTools
       puts
     end
 
-    def print_slow_queries(top_n)
+    def print_slow_queries(top_n, format)
       print "   Top-#{top_n} slow queries:\n"
       entries.sort_by(&:duration).reverse.first(top_n).each { |e|
-        print "      #{e.duration}ms (#{pct(sql_duration, e.duration)}) #{e.sql}\n"
+        print "      #{e.duration}ms (#{pct(sql_duration, e.duration)}) "
+        puts e.format_sql(format)
       }
       puts
     end
