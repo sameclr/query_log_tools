@@ -1,6 +1,6 @@
 require 'time'
 
-require 'query_log_tools/mysql_log_entry.rb'
+require 'log_tools/mysql_log_entry.rb'
 
 module MysqlLogTools
   class LogParser

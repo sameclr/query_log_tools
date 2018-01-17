@@ -1,13 +1,15 @@
 require 'mysql2'
 require 'yaml'
 
-require 'query_log_tools/query_log_entry'
-require 'query_log_tools/query_log_entry_group'
-require 'query_log_tools/query_log'
-require 'query_log_tools/query_log_parser'
-require 'query_log_tools/query_log_summary'
-require 'query_log_tools/version'
-require 'query_log_tools/error'
+require 'log_tools/entry.rb'
+require 'log_tools/error'
+require 'log_tools/version'
+
+require 'log_tools/query_log'
+require 'log_tools/query_log_entry'
+require 'log_tools/query_log_entry_group'
+require 'log_tools/query_log_parser'
+require 'log_tools/query_log_summary'
 
 module QueryLogTools
   def self.query_log_summary(filename_or_nil, options)
@@ -57,9 +59,10 @@ module QueryLogTools
         :database => options[:database] || config["database"]
     })
 
-    print "# Logfile created on #{Time.now.strftime('%F %T %Z')} " \
+    print "# Logfile created on #{Time.now.utc.strftime('%F %T %Z')} " \
           "against #{config["database"]}@#{config["host"]}\n\n"
 
+    # FIXME Entry#write is missing
     Log.new(filename || $stdin).entries.each { |e|
       next if e.cached?
       timestamp = Time.now.utc
@@ -70,9 +73,8 @@ module QueryLogTools
 
 private
   # Find path to database.yml. filename_or_nil is either a direct path to
-  # database.yml, a path to the rails root directory, or nil. If nil, this 
-  # method will search upwards in the dirctory hierarchy looking for a rails 
-  # root
+  # database.yml, a path to the rails root directory, or nil. If nil, search
+  # upwards in the dirctory hierarchy looking for a rails root
   def self.find_database_yml(filename_or_nil)
     if filename_or_nil
       if File.file?(filename_or_nil)
@@ -82,9 +84,8 @@ private
         File.file?(filename) or 
             fail "'#{filename_or_nil}' is not a Rails root directory"
         return filename
-      else
-        fail "Can't read '#{filename_or_nil}'"
       end
+      fail "Can't read '#{filename_or_nil}'"
     else
       path = Dir.pwd + "/"
       dirs = path.scan(/[^\/]*\//)
@@ -93,10 +94,7 @@ private
         return file if File.exist?(filename)
         dirs.pop
       end
-#     error GoBoom.new
       fail "Can't find database configuration file"
-#     raise Thor::Error.new "Can't find database configuration file"
-#     error "ERROR: Can't find database configuration file"
     end
   end
 

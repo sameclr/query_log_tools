@@ -1,6 +1,6 @@
 
-require 'query_log_tools/shell'
-require 'query_log_tools/error'
+require 'log_tools/shell'
+require 'log_tools/error'
 
 # TODO: Move to options or configuration 
 MYSQL_HOST = "in26.samesystem.net"

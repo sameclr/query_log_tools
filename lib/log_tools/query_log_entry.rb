@@ -10,6 +10,14 @@ module QueryLogTools
     end
 
     def cached?() operation == "[cached]" end
+
+    def write
+      print "#{timestamp.strftime("%F %T %Z")} #{operation} (#{duration}ms)\n"
+      print "  #{sql}\n"
+      print "  ↳ #{backtrace.first}\n"
+      backtrace.drop(1).each { |l| print "    #{l}\n" }
+      puts
+    end
   end
 end
 

@@ -1,16 +1,16 @@
 
 lib = File.expand_path("../lib", __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require "query_log_tools/version"
+require "log_tools/version"
 
 Gem::Specification.new do |spec|
-  spec.name          = "query_log_tools"
-  spec.version       = QueryLogTools::VERSION
+  spec.name          = "log_tools"
+  spec.version       = LogTools::VERSION
   spec.authors       = ["Claus Rasmussen"]
   spec.email         = ["claus.rasmussen@samesystem.com"]
 
-  spec.summary       = %q{query_log_tools gem}
-  spec.description   = %q{query_log_tools gem}
+  spec.summary       = %q{log_tools gem}
+  spec.description   = %q{log_tools gem}
   spec.homepage      = "TODO: Put your gem's website or public repo URL here."
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
