@@ -8,7 +8,6 @@ require 'log_tools/version'
 require 'log_tools/query_log'
 require 'log_tools/query_log_entry'
 require 'log_tools/query_log_entry_group'
-require 'log_tools/query_log_parser'
 require 'log_tools/query_log_summary'
 
 module QueryLogTools

@@ -5,7 +5,7 @@ TODO
   o Make sure replay doesn't include DELETE/INSERT/etc. statements
   o Document handling of double spaces in SQL
   o Make it possible to add comments to slow queries
-  o QueryLogTools::Log#new vs. MysqlLogTools::parse <- do it the same way
 
+  + QueryLogTools::Log#new vs. MysqlLogTools::parse <- do it the same way
   + Add ';' to all 'queries' commands
 

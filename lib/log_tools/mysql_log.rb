@@ -6,12 +6,17 @@ module MysqlLogTools
   class Log
     attr_reader :filename, :entries
 
-    def initialize(filename, entries = [])
-      @filename, @entries = filename, entries
+    def initialize(filename)
+      @filename, @entries = filename, []
+      parse(filename)
     end
 
-    def self.parse(filename)
-      log = Log.new(filename)
+    def render_format(sql_format = :raw)
+      entries.each { |e| e.render_format(sql_format); puts }
+    end
+
+  private
+    def parse(filename)
       timestamp, duration, lock_time, rows_sent, rows_examined = nil
       sql = []
       File.open(filename, "r").each { |l|
@@ -35,7 +40,7 @@ module MysqlLogTools
         else
           if l.end_with?(";")
             sql << l.chop
-            log.entries << Entry.new(
+            @entries << Entry.new(
                 timestamp, duration, sql.join(" "), 
                 lock_time, rows_sent, rows_examined)
             sql = []
@@ -44,11 +49,6 @@ module MysqlLogTools
           end
         end
       }
-      log
-    end
-
-    def render_format(sql_format = :raw)
-      entries.each { |e| e.render_format(sql_format); puts }
     end
   end
 end
