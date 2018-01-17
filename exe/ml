@@ -6,17 +6,17 @@ require 'mysql_log_tools.rb'
 class App < Thor
   package_name "MySQL Log"
 
-  desc "queries [logfile]", "List queries"
+  desc "list [logfile]", "List logfile entries"
   option :format, :desc => "Query format",
       :type => :string, :default => "raw", :aliases => "-f",
       :enum => %w(raw short abstract)
-  def queries(filename = "/dev/stdin")
-    MysqlLogTools.list_queries(filename, options[:format].to_sym)
+  def list(filename = "/dev/stdin")
+    MysqlLogTools.list(filename, options[:format].to_sym)
   end
 
-  desc "abstract-queries [logfile]", "List abstract queries in log file"
-  def abstract_queries(filename = "/dev/stdin")
-    MysqlLogTools.list_queries(filename, :abstract)
+  desc "queries [logfile]", "List queries"
+  def queries(filename = "/dev/stdin")
+    MysqlLogTools.list_queries(filename)
   end
 end
 

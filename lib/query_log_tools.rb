@@ -28,7 +28,7 @@ module QueryLogTools
   def self.list_queries(filename, options)
     Log.new(filename).entries.each { |e|
       !e.cached? || options[:cached] or next
-      print e.sql, "\n"
+      print e.sql, ";\n"
     }
   end
 
