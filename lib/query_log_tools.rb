@@ -17,6 +17,14 @@ module QueryLogTools
     LogSummary.new(log).report(options[:top] || LogSummary::TOP_LIST_LENGTH)
   end
 
+  def self.query_log_list(filename, incl_cached)
+    Log.new(filename).entries.each { |e|
+      !e.cached? || incl_cached or next
+      e.render
+      puts
+    }
+  end
+
   def self.query_log_queries(filename, options)
     Log.new(filename).entries.each { |e|
       !e.cached? || options[:cached] or next

@@ -16,7 +16,6 @@ module QueryLogTools
       print "  #{sql}\n"
       print "  ↳ #{backtrace.first}\n"
       backtrace.drop(1).each { |l| print "    #{l}\n" }
-      puts
     end
   end
 end

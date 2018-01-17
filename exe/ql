@@ -13,6 +13,13 @@ class App < Thor
     QueryLogTools.query_log_summary(filename, options)
   end
 
+  desc "list [logfile]", "List logfile entries"
+  option :cached, :type => :boolean, :default => false, :aliases => "-c",
+         :desc => "Include cached queries (default false)"
+  def list(filename = "/dev/stdin")
+    QueryLogTools.query_log_list(filename, options[:cached])
+  end
+
   desc "queries [logfile]", "List queries"
   option :cached, :type => :boolean, :default => false, :aliases => "-c",
          :desc => "Include cached queries (default false)"
